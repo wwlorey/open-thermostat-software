@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  Alert,
   Image,
   Platform,
   ScrollView,
@@ -8,6 +9,7 @@ import {
   TouchableOpacity,
   View,
   Dimensions,
+  Button,
 } from 'react-native';
 import { WebBrowser } from 'expo';
 import { MonoText } from '../components/StyledText';
@@ -18,11 +20,13 @@ class Temperature extends React.Component {
     this.state = { temperature: 69 };
 
     // Increase the temperature by 1 degree every few seconds
+    /*
     setInterval(() => (
       this.setState(previousState => (
         { temperature: previousState.temperature + 1 }
       ))
     ), 2 * 1000);
+    */
   }
 
   render() {
@@ -40,6 +44,10 @@ export default class HomeScreen extends React.Component {
     header: null,
   };
 
+  _onPressButton() {
+    Alert.alert('Wouldn\'t you like to')
+  }
+
   render() {
     return (
       <View style={styles.container}>
@@ -48,7 +56,17 @@ export default class HomeScreen extends React.Component {
             <Temperature/>
           </View>
 
-          <View style={styles.controlBody}></View>
+          <View style={styles.controlBody}>
+
+            <View style={styles.buttonContainer}>
+              <Button
+                onPress={this._onPressButton}
+                title="Set Temperature"
+                color="#FFFFFF"
+              />
+            </View>
+          
+          </View>
 
           {/*<View style={styles.getStartedContainer}>
             {this._maybeRenderDevelopmentModeWarning()}
@@ -157,6 +175,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     backgroundColor: '#CEE2FF',
     transform: [{ scaleX: 2 }],
+  },
+  buttonContainer: {
+    marginTop: 100,
+    backgroundColor: '#003366',
   },
   getStartedContainer: {
     alignItems: 'center',
