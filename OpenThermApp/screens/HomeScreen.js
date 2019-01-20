@@ -50,7 +50,7 @@ export default class HomeScreen extends React.Component {
 
           <View style={styles.controlBody}></View>
 
-          <View style={styles.getStartedContainer}>
+          {/*<View style={styles.getStartedContainer}>
             {this._maybeRenderDevelopmentModeWarning()}
 
             <Text style={styles.getStartedText}>Get started by opening</Text>
@@ -68,16 +68,16 @@ export default class HomeScreen extends React.Component {
             <TouchableOpacity onPress={this._handleHelpPress} style={styles.helpLink}>
               <Text style={styles.helpLinkText}>Help, it didn’t automatically reload!</Text>
             </TouchableOpacity>
-          </View>
+          </View>*/}
         </ScrollView>
 
-        <View style={styles.tabBarInfoContainer}>
+        {/*<View style={styles.tabBarInfoContainer}>
           <Text style={styles.tabBarInfoText}>This is a tab bar. You can edit it in:</Text>
 
           <View style={[styles.codeHighlightContainer, styles.navigationFilename]}>
             <MonoText style={styles.codeHighlightText}>navigation/MainTabNavigator.js</MonoText>
           </View>
-        </View>
+        </View>*/}
       </View>
     );
   }
