@@ -27,9 +27,9 @@ class Temperature extends React.Component {
 
   render() {
     return (
-      <View>
+      <View style={styles.temperatureContainer}>
         <Text style={styles.temperatureText}>{this.state.temperature}</Text>
-        <Text style={styles.unit}>°F</Text>
+        <Text style={styles.temperatureUnit}>°F</Text>
       </View>
     );
   }
@@ -44,7 +44,7 @@ export default class HomeScreen extends React.Component {
     return (
       <View style={styles.container}>
         <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer} scrollEnabled={false}>
-          <View style={styles.temperatureContainer}>
+          <View style={styles.header}>
             <Temperature/>
           </View>
 
@@ -131,13 +131,21 @@ const styles = StyleSheet.create({
   contentContainer: {
     paddingTop: 30,
   },
-  temperatureContainer: {
+  header: {
+    flex: 1,
     alignItems: 'center',
+  },
+  temperatureContainer: {
     paddingTop: 40,
     paddingBottom: 20,
+    flexDirection: 'row', 
   },
   temperatureText: {
-    fontSize: 170
+    fontSize: 170,
+  },
+  temperatureUnit: {
+    fontSize: 30,
+    paddingTop: 45,
   },
   controlBody: {
     // Create an oval top and rectangular sides & bottom
