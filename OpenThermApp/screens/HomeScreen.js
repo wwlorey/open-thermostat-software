@@ -7,10 +7,33 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Dimensions,
 } from 'react-native';
 import { WebBrowser } from 'expo';
-
 import { MonoText } from '../components/StyledText';
+
+class Temperature extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { temperature: 69 };
+
+    // Increase the temperature by 1 degree every few seconds
+    setInterval(() => (
+      this.setState(previousState => (
+        { temperature: previousState.temperature + 1 }
+      ))
+    ), 2 * 1000);
+  }
+
+  render() {
+    return (
+      <View>
+        <Text style={styles.temperatureText}>{this.state.temperature}</Text>
+        <Text style={styles.unit}>°F</Text>
+      </View>
+    );
+  }
+}
 
 export default class HomeScreen extends React.Component {
   static navigationOptions = {
@@ -20,17 +43,12 @@ export default class HomeScreen extends React.Component {
   render() {
     return (
       <View style={styles.container}>
-        <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-          <View style={styles.welcomeContainer}>
-            <Image
-              source={
-                __DEV__
-                  ? require('../assets/images/robot-dev.png')
-                  : require('../assets/images/robot-prod.png')
-              }
-              style={styles.welcomeImage}
-            />
+        <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer} scrollEnabled={false}>
+          <View style={styles.temperatureContainer}>
+            <Temperature/>
           </View>
+
+          <View style={styles.controlBody}></View>
 
           <View style={styles.getStartedContainer}>
             {this._maybeRenderDevelopmentModeWarning()}
@@ -113,17 +131,24 @@ const styles = StyleSheet.create({
   contentContainer: {
     paddingTop: 30,
   },
-  welcomeContainer: {
+  temperatureContainer: {
     alignItems: 'center',
-    marginTop: 10,
-    marginBottom: 20,
+    paddingTop: 40,
+    paddingBottom: 20,
   },
-  welcomeImage: {
-    width: 100,
-    height: 80,
-    resizeMode: 'contain',
-    marginTop: 3,
-    marginLeft: -10,
+  temperatureText: {
+    fontSize: 170
+  },
+  controlBody: {
+    // Create an oval top and rectangular sides & bottom
+    alignItems: 'center',
+    width: Dimensions.get('window').width,
+    height: Dimensions.get('window').height,
+    borderRadius: Dimensions.get('window').width / 2,
+    borderTopColor: 'black',
+    borderWidth: 1,
+    backgroundColor: '#CEE2FF',
+    transform: [{ scaleX: 2 }],
   },
   getStartedContainer: {
     alignItems: 'center',
