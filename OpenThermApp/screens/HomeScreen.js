@@ -11,6 +11,8 @@ import {
 import { WebBrowser } from 'expo';
 import { MonoText } from '../components/StyledText';
 
+const TEMP_SET_STATES = Object.freeze({'PRE': 1, 'IN_PROGRESS': 2, 'POST': 3})
+
 class Temperature extends React.Component {
   constructor(props) {
     super(props);
@@ -30,50 +32,70 @@ class Temperature extends React.Component {
 class SetTemperatureButton extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { visible: true };
-
-    // You must "bind" functions in the constructor
-    this._handlePress = this._handlePress.bind(this);
-  }
-
-  _handlePress() {
-    this.setState({ visible: false }) 
   }
 
   render() {
-    if (this.state.visible) {
-      return (
-        <TouchableHighlight onPress={this._handlePress} underlayColor="white">
-          <View style={styles.button}>
-            <Text style={styles.buttonText}>Set Temperature</Text>
-          </View>
-        </TouchableHighlight>
-      );
-    }
-
-    return ( null );
+    return (
+      <TouchableHighlight onPress={this.props.handlePress} underlayColor="white">
+        <View style={styles.button}>
+          <Text style={styles.buttonText}>Set Temperature</Text>
+        </View>
+      </TouchableHighlight>
+    );
   }
 }
 
 class SliderExample extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { value: 0.2, visible: false };
+    this.state = { value: props.beginningValue };
   }
  
   render() {
-    if (this.state.visible) {
+    return (
+      <View style={styles.sliderContainer}>
+        <Slider
+          value={this.state.value}
+          onValueChange={(value) => this.setState({value})} />
+        <Text>Value: {this.state.value}</Text>
+      </View>
+    );
+  }
+}
+
+class ControlVerbage extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { temp_set_state: TEMP_SET_STATES.PRE };
+
+    // You must "bind" functions in the constructor
+    this.handleTempSetPress = this.handleTempSetPress.bind(this);
+    this.renderTempComponents = this.renderTempComponents .bind(this);
+  }
+
+  handleTempSetPress() {
+    this.setState({ temp_set_state: TEMP_SET_STATES.IN_PROGRESS }) 
+  }
+
+  renderTempComponents () {
+    if (this.state.temp_set_state == TEMP_SET_STATES.PRE) {
       return (
-        <View style={styles.sliderContainer}>
-          <Slider
-            value={this.state.value}
-            onValueChange={(value) => this.setState({value})} />
-          <Text>Value: {this.state.value}</Text>
-        </View>
+        <SetTemperatureButton handlePress={this.handleTempSetPress}/> 
       );
     }
+    else if (this.state.temp_set_state == TEMP_SET_STATES.IN_PROGRESS) {
+      return (
+        <SliderExample beginningValue={69}/>
+      );
+    }
+  }
 
-    return ( null );
+  render() {
+    return (
+      <View style={styles.controlVerbage}>
+        {this.renderTempComponents()}    
+      </View>
+    );
   }
 }
 
@@ -92,15 +114,8 @@ export default class HomeScreen extends React.Component {
           </View>
 
          <View style={styles.controlBody}>
-            <View style={styles.controlVerbage}>
-              <SetTemperatureButton/>
-
-              <SliderExample/>
-
-            </View>
-
+            <ControlVerbage/>
             <View style={styles.controlBackground}></View>
-
           </View>
 
         </ScrollView>
