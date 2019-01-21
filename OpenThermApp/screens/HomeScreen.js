@@ -1,8 +1,8 @@
 import React from 'react';
 import {
-  Alert,
   Dimensions,
   ScrollView,
+  Slider,
   StyleSheet,
   Text,
   TouchableHighlight,
@@ -57,6 +57,24 @@ class SetTemperatureButton extends React.Component {
   }
 }
 
+class SliderExample extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { value: 0.2 };
+  }
+ 
+  render() {
+    return (
+      <View style={styles.sliderContainer}>
+        <Slider
+          value={this.state.value}
+          onValueChange={(value) => this.setState({value})} />
+        <Text>Value: {this.state.value}</Text>
+      </View>
+    );
+  }
+}
+
 export default class HomeScreen extends React.Component {
   static navigationOptions = {
     header: null,
@@ -74,6 +92,9 @@ export default class HomeScreen extends React.Component {
          <View style={styles.controlBody}>
             <View style={styles.controlVerbage}>
               <SetTemperatureButton/>
+
+              <SliderExample/>
+
             </View>
 
             <View style={styles.controlBackground}></View>
@@ -143,5 +164,13 @@ const styles = StyleSheet.create({
     padding: 20,
     fontSize: 23,
     color: 'white',
+  },
+  sliderContainer: {
+    flex: 1,
+    width: 300,
+    marginLeft: 10,
+    marginRight: 10,
+    alignItems: 'stretch',
+    justifyContent: 'center',
   },
 });
