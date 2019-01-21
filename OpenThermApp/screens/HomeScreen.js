@@ -51,27 +51,29 @@ class SetTemperatureButton extends React.Component {
       );
     }
 
-    return (
-      null
-    );
+    return ( null );
   }
 }
 
 class SliderExample extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { value: 0.2 };
+    this.state = { value: 0.2, visible: false };
   }
  
   render() {
-    return (
-      <View style={styles.sliderContainer}>
-        <Slider
-          value={this.state.value}
-          onValueChange={(value) => this.setState({value})} />
-        <Text>Value: {this.state.value}</Text>
-      </View>
-    );
+    if (this.state.visible) {
+      return (
+        <View style={styles.sliderContainer}>
+          <Slider
+            value={this.state.value}
+            onValueChange={(value) => this.setState({value})} />
+          <Text>Value: {this.state.value}</Text>
+        </View>
+      );
+    }
+
+    return ( null );
   }
 }
 
