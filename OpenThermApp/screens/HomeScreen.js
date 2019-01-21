@@ -27,14 +27,40 @@ class Temperature extends React.Component {
   }
 }
 
+class SetTemperatureButton extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { visible: true };
+
+    // You must "bind" functions in the constructor
+    this._handlePress = this._handlePress.bind(this);
+  }
+
+  _handlePress() {
+    this.setState({ visible: false }) 
+  }
+
+  render() {
+    if (this.state.visible) {
+      return (
+        <TouchableHighlight onPress={this._handlePress} underlayColor="white">
+          <View style={styles.button}>
+            <Text style={styles.buttonText}>Set Temperature</Text>
+          </View>
+        </TouchableHighlight>
+      );
+    }
+
+    return (
+      null
+    );
+  }
+}
+
 export default class HomeScreen extends React.Component {
   static navigationOptions = {
     header: null,
   };
-
-  _onPressButton() {
-    Alert.alert('Wouldn\'t you like to')
-  }
 
   render() {
     return (
@@ -47,13 +73,7 @@ export default class HomeScreen extends React.Component {
 
          <View style={styles.controlBody}>
             <View style={styles.controlVerbage}>
-
-              <TouchableHighlight onPress={this._onPressButton} underlayColor="white">
-                <View style={styles.button}>
-                  <Text style={styles.buttonText}>Set Temperature</Text>
-                </View>
-              </TouchableHighlight>
-
+              <SetTemperatureButton/>
             </View>
 
             <View style={styles.controlBackground}></View>
