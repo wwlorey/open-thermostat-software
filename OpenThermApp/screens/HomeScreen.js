@@ -56,8 +56,11 @@ class SliderExample extends React.Component {
       <View style={styles.sliderContainer}>
         <Slider
           value={this.state.value}
-          onValueChange={(value) => this.setState({value})} />
-        <Text>Value: {this.state.value}</Text>
+          onValueChange={(value) => this.setState({value})} 
+          minimumValue={50}
+          maximumValue={100}
+          step={1} />
+        <Text>Set Temperature: {this.state.value}</Text>
       </View>
     );
   }
