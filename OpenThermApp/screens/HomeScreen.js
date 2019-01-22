@@ -8,8 +8,6 @@ import {
   TouchableHighlight,
   View,
 } from 'react-native';
-import { WebBrowser } from 'expo';
-import { MonoText } from '../components/StyledText';
 
 const TEMP_SET_STATES = Object.freeze({'PRE': 1, 'IN_PROGRESS': 2, 'POST': 3})
 
