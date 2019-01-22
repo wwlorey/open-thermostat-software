@@ -55,27 +55,27 @@ class TemperatureSlider extends React.Component {
 
 class ControlVerbage extends React.Component {
   state = {
-    temp_set_state: TEMP_SET_STATES.PRE,
+    tempSetState: TEMP_SET_STATES.PRE,
   };
 
   handleTempSetPress = () => {
-    this.setState({ temp_set_state: TEMP_SET_STATES.IN_PROGRESS });
+    this.setState({ tempSetState: TEMP_SET_STATES.IN_PROGRESS });
   };
 
   handleDonePress = () => {
-    this.setState({ temp_set_state: TEMP_SET_STATES.POST });
+    this.setState({ tempSetState: TEMP_SET_STATES.POST });
   };
 
   render() {
-    const { temp_set_state } = this.state;
+    const { tempSetState } = this.state;
     return (
       <View style={styles.controlVerbage}>
-        {temp_set_state === TEMP_SET_STATES.PRE ? (
+        {tempSetState === TEMP_SET_STATES.PRE ? (
           <BetterButton
             buttonText="Set Temperature"
             handlePress={this.handleTempSetPress}
           />
-        ) : temp_set_state === TEMP_SET_STATES.IN_PROGRESS ? (
+        ) : tempSetState === TEMP_SET_STATES.IN_PROGRESS ? (
           <>
             <TemperatureSlider beginningValue={69} />
             <BetterButton
