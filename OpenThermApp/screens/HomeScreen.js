@@ -9,13 +9,10 @@ import {
   View,
 } from 'react-native';
 
-const TEMP_SET_STATES = Object.freeze({'PRE': 1, 'IN_PROGRESS': 2, 'POST': 3})
+const TEMP_SET_STATES = Object.freeze({ PRE: 1, IN_PROGRESS: 2, POST: 3 });
 
 class Temperature extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { temperature: 69 };
-  }
+  state = { temperature: 69 };
 
   render() {
     return (
@@ -27,37 +24,29 @@ class Temperature extends React.Component {
   }
 }
 
-class BetterButton extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
-  render() {
-    return (
-      <TouchableHighlight onPress={this.props.handlePress} underlayColor="white">
-        <View style={styles.button}>
-          <Text style={styles.buttonText}>{this.props.buttonText}</Text>
-        </View>
-      </TouchableHighlight>
-    );
-  }
+function BetterButton({ buttonText, handlePress }) {
+  return (
+    <TouchableHighlight onPress={handlePress} underlayColor="white">
+      <View style={styles.button}>
+        <Text style={styles.buttonText}>{buttonText}</Text>
+      </View>
+    </TouchableHighlight>
+  );
 }
 
 class TemperatureSlider extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { value: props.beginningValue };
-  }
- 
+  state = { value: this.props.beginningValue };
+
   render() {
     return (
       <View style={styles.sliderContainer}>
         <Slider
           value={this.state.value}
-          onValueChange={(value) => this.setState({value})} 
+          onValueChange={value => this.setState({ value })}
           minimumValue={50}
           maximumValue={100}
-          step={1} />
+          step={1}
+        />
         <Text>Set Temperature: {this.state.value}</Text>
       </View>
     );
@@ -65,70 +54,61 @@ class TemperatureSlider extends React.Component {
 }
 
 class ControlVerbage extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { temp_set_state: TEMP_SET_STATES.PRE };
+  state = {
+    temp_set_state: TEMP_SET_STATES.PRE,
+  };
 
-    // You must "bind" functions in the constructor
-    this.handleTempSetPress = this.handleTempSetPress.bind(this);
-    this.handleDonePress = this.handleDonePress.bind(this);
-    this.renderTempComponents = this.renderTempComponents .bind(this);
-  }
+  handleTempSetPress = () => {
+    this.setState({ temp_set_state: TEMP_SET_STATES.IN_PROGRESS });
+  };
 
-  handleTempSetPress() {
-    this.setState({ temp_set_state: TEMP_SET_STATES.IN_PROGRESS }) 
-  }
-
-  handleDonePress() {
-    this.setState({ temp_set_state: TEMP_SET_STATES.POST })
-  }
-
-  renderTempComponents () {
-    if (this.state.temp_set_state == TEMP_SET_STATES.PRE) {
-      return (
-        <BetterButton buttonText='Set Temperature' handlePress={this.handleTempSetPress}/> 
-      );
-    }
-    else if (this.state.temp_set_state == TEMP_SET_STATES.IN_PROGRESS) {
-      return (
-        <View>
-          <TemperatureSlider beginningValue={69}/>
-          <BetterButton buttonText='Done' handlePress={this.handleDonePress}/> 
-        </View>
-      );
-    }
-  }
+  handleDonePress = () => {
+    this.setState({ temp_set_state: TEMP_SET_STATES.POST });
+  };
 
   render() {
+    const { temp_set_state } = this.state;
     return (
       <View style={styles.controlVerbage}>
-        {this.renderTempComponents()}    
+        {temp_set_state === TEMP_SET_STATES.PRE ? (
+          <BetterButton
+            buttonText="Set Temperature"
+            handlePress={this.handleTempSetPress}
+          />
+        ) : temp_set_state === TEMP_SET_STATES.IN_PROGRESS ? (
+          <>
+            <TemperatureSlider beginningValue={69} />
+            <BetterButton
+              buttonText="Done"
+              handlePress={this.handleDonePress}
+            />
+          </>
+        ) : null}
       </View>
     );
   }
 }
 
 export default class HomeScreen extends React.Component {
-  static navigationOptions = {
-    header: null,
-  };
+  static navigationOptions = { header: null };
 
   render() {
     return (
       <View style={styles.container}>
-        <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer} scrollEnabled={false}>
-
+        <ScrollView
+          style={styles.container}
+          contentContainerStyle={styles.contentContainer}
+          scrollEnabled={false}
+        >
           <View style={styles.header}>
-            <Temperature/>
+            <Temperature />
           </View>
 
-         <View style={styles.controlBody}>
-            <ControlVerbage/>
-            <View style={styles.controlBackground}></View>
+          <View style={styles.controlBody}>
+            <ControlVerbage />
+            <View style={styles.controlBackground} />
           </View>
-
         </ScrollView>
-
       </View>
     );
   }
@@ -149,7 +129,7 @@ const styles = StyleSheet.create({
   temperatureContainer: {
     paddingTop: 40,
     paddingBottom: 20,
-    flexDirection: 'row', 
+    flexDirection: 'row',
   },
   temperatureText: {
     fontSize: 170,
