@@ -43,7 +43,7 @@ class SetTemperatureButton extends React.Component {
   }
 }
 
-class SliderExample extends React.Component {
+class TemperatureSlider extends React.Component {
   constructor(props) {
     super(props);
     this.state = { value: props.beginningValue };
@@ -86,7 +86,7 @@ class ControlVerbage extends React.Component {
     }
     else if (this.state.temp_set_state == TEMP_SET_STATES.IN_PROGRESS) {
       return (
-        <SliderExample beginningValue={69}/>
+        <TemperatureSlider beginningValue={69}/>
       );
     }
   }
