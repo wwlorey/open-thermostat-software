@@ -27,7 +27,7 @@ class Temperature extends React.Component {
   }
 }
 
-class SetTemperatureButton extends React.Component {
+class BetterButton extends React.Component {
   constructor(props) {
     super(props);
   }
@@ -36,7 +36,7 @@ class SetTemperatureButton extends React.Component {
     return (
       <TouchableHighlight onPress={this.props.handlePress} underlayColor="white">
         <View style={styles.button}>
-          <Text style={styles.buttonText}>Set Temperature</Text>
+          <Text style={styles.buttonText}>{this.props.buttonText}</Text>
         </View>
       </TouchableHighlight>
     );
@@ -71,6 +71,7 @@ class ControlVerbage extends React.Component {
 
     // You must "bind" functions in the constructor
     this.handleTempSetPress = this.handleTempSetPress.bind(this);
+    this.handleDonePress = this.handleDonePress.bind(this);
     this.renderTempComponents = this.renderTempComponents .bind(this);
   }
 
@@ -78,15 +79,22 @@ class ControlVerbage extends React.Component {
     this.setState({ temp_set_state: TEMP_SET_STATES.IN_PROGRESS }) 
   }
 
+  handleDonePress() {
+    this.setState({ temp_set_state: TEMP_SET_STATES.POST })
+  }
+
   renderTempComponents () {
     if (this.state.temp_set_state == TEMP_SET_STATES.PRE) {
       return (
-        <SetTemperatureButton handlePress={this.handleTempSetPress}/> 
+        <BetterButton buttonText='Set Temperature' handlePress={this.handleTempSetPress}/> 
       );
     }
     else if (this.state.temp_set_state == TEMP_SET_STATES.IN_PROGRESS) {
       return (
-        <TemperatureSlider beginningValue={69}/>
+        <View>
+          <TemperatureSlider beginningValue={69}/>
+          <BetterButton buttonText='Done' handlePress={this.handleDonePress}/> 
+        </View>
       );
     }
   }
