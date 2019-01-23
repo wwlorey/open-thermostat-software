@@ -148,7 +148,7 @@ class ControlVerbage extends React.Component {
 
 export default class HomeScreen extends React.Component {
   state = {
-    temperature: 69,
+    temperature: DEFAULT_TEMPERATURE,
   };
 
   static navigationOptions = { header: null };
