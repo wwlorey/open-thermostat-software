@@ -10,19 +10,16 @@ import {
 } from 'react-native';
 
 const TEMP_SET_STATES = Object.freeze({ PRE: 1, IN_PROGRESS: 2, POST: 3 });
+const DEFAULT_TEMPERATURE = 69;
 const NOTIFICATION_TIMEOUT = 3;
 
-class Temperature extends React.Component {
-  state = { temperature: 69 };
-
-  render() {
-    return (
-      <View style={styles.temperatureContainer}>
-        <Text style={styles.temperatureText}>{this.state.temperature}</Text>
-        <Text style={styles.temperatureUnit}>°F</Text>
-      </View>
-    );
-  }
+function Temperature({ value }) {
+  return (
+    <View style={styles.temperatureContainer}>
+      <Text style={styles.temperatureText}>{value}</Text>
+      <Text style={styles.temperatureUnit}>°F</Text>
+    </View>
+  );
 }
 
 function BetterButton({ buttonText, handlePress }) {
@@ -36,7 +33,16 @@ function BetterButton({ buttonText, handlePress }) {
 }
 
 class TemperatureSlider extends React.Component {
-  state = { value: this.props.beginningValue };
+  constructor(props) {
+    super(props);
+    this.state = { value: this.props.beginningValue };
+    this.props.passUpValue(this.state.value);
+  }
+
+  handleValueChange(value) {
+    this.setState({ value });
+    this.props.passUpValue(this.state.value);
+  }
 
   render() {
     return (
@@ -44,6 +50,7 @@ class TemperatureSlider extends React.Component {
         <Slider
           value={this.state.value}
           onValueChange={value => this.setState({ value })}
+          onSlidingComplete={this.handleValueChange.bind(this)}
           minimumValue={50}
           maximumValue={100}
           step={1}
@@ -72,6 +79,7 @@ class ControlVerbage extends React.Component {
   state = {
     tempSetState: TEMP_SET_STATES.PRE,
     notificationVisible: true,
+    newTempValue: DEFAULT_TEMPERATURE,
   };
 
   handleTempSetPress = () => {
@@ -84,6 +92,7 @@ class ControlVerbage extends React.Component {
   handleDonePress = () => {
     this.setState({ tempSetState: TEMP_SET_STATES.POST });
     this.beginNotificationDeath();
+    this.props.passUpValue(this.state.newTempValue);
   };
 
   beginNotificationDeath = () => {
@@ -91,6 +100,10 @@ class ControlVerbage extends React.Component {
     this.notificationTimeoutHandle = setTimeout(() => {
       this.setState({ notificationVisible: false });
     }, NOTIFICATION_TIMEOUT * 1000);
+  }
+
+  passUpValue = (newTempValue) => {
+    this.setState({ newTempValue });
   }
 
   render() {
@@ -106,7 +119,7 @@ class ControlVerbage extends React.Component {
           />
         ) : tempSetState === TEMP_SET_STATES.IN_PROGRESS ? (
           <>
-            <TemperatureSlider beginningValue={69} />
+            <TemperatureSlider passUpValue={this.passUpValue} beginningValue={this.state.newTempValue} />
             <BetterButton
               buttonText="Done"
               handlePress={this.handleDonePress}
@@ -134,7 +147,15 @@ class ControlVerbage extends React.Component {
 }
 
 export default class HomeScreen extends React.Component {
+  state = {
+    temperature: 69,
+  };
+
   static navigationOptions = { header: null };
+
+  updateTemperatureValue = (value) => {
+    this.setState({temperature: value});
+  }
 
   render() {
     return (
@@ -145,11 +166,11 @@ export default class HomeScreen extends React.Component {
           scrollEnabled={false}
         >
           <View style={styles.header}>
-            <Temperature />
+            <Temperature value={this.state.temperature}/>
           </View>
 
           <View style={styles.controlBody}>
-            <ControlVerbage />
+            <ControlVerbage passUpValue={this.updateTemperatureValue} />
             <View style={styles.controlBackground} />
           </View>
         </ScrollView>
