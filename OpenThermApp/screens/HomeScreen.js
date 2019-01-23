@@ -102,7 +102,7 @@ class ControlVerbage extends React.Component {
     }, NOTIFICATION_TIMEOUT * 1000);
   }
 
-  passUpValue = (newTempValue) => {
+  updateNewTempValue = (newTempValue) => {
     this.setState({ newTempValue });
   }
 
@@ -119,7 +119,7 @@ class ControlVerbage extends React.Component {
           />
         ) : tempSetState === TEMP_SET_STATES.IN_PROGRESS ? (
           <>
-            <TemperatureSlider passUpValue={this.passUpValue} beginningValue={this.state.newTempValue} />
+            <TemperatureSlider passUpValue={this.updateNewTempValue} beginningValue={this.state.newTempValue} />
             <BetterButton
               buttonText="Done"
               handlePress={this.handleDonePress}
