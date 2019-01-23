@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 
 const TEMP_SET_STATES = Object.freeze({ PRE: 1, IN_PROGRESS: 2, POST: 3 });
+const NOTIFICATION_TIMEOUT = 3;
 
 class Temperature extends React.Component {
   state = { temperature: 69 };
@@ -53,21 +54,49 @@ class TemperatureSlider extends React.Component {
   }
 }
 
+class Notification extends React.Component {
+  state = {
+    visible: true
+  }
+
+  render() {
+    return (
+      this.state.visible ? (
+        <Text style={styles.notificationText}>{this.props.text}</Text>
+      ) : null
+    );
+  }
+}
+
 class ControlVerbage extends React.Component {
   state = {
     tempSetState: TEMP_SET_STATES.PRE,
+    notificationVisible: true,
   };
 
   handleTempSetPress = () => {
-    this.setState({ tempSetState: TEMP_SET_STATES.IN_PROGRESS });
+    this.setState({ tempSetState: TEMP_SET_STATES.IN_PROGRESS, notificationVisible: true });
+
+    // Ensure residual notification timeout is cleared
+    clearTimeout(this.notificationTimeoutHandle);
   };
 
   handleDonePress = () => {
     this.setState({ tempSetState: TEMP_SET_STATES.POST });
+    this.beginNotificationDeath();
   };
+
+  beginNotificationDeath = () => {
+    // Stop displaying notification after NOTIFICATION_TIMEOUT seconds
+    this.notificationTimeoutHandle = setTimeout(() => {
+      this.setState({ notificationVisible: false });
+    }, NOTIFICATION_TIMEOUT * 1000);
+  }
 
   render() {
     const { tempSetState } = this.state;
+    const { notificationVisible } = this.state;
+
     return (
       <View style={styles.controlVerbage}>
         {tempSetState === TEMP_SET_STATES.PRE ? (
@@ -83,7 +112,22 @@ class ControlVerbage extends React.Component {
               handlePress={this.handleDonePress}
             />
           </>
-        ) : null}
+        ) : tempSetState == TEMP_SET_STATES.POST && notificationVisible ? (
+          <>
+            <BetterButton
+              buttonText="Set Temperature"
+              handlePress={this.handleTempSetPress}
+            />
+            <Notification text="Temperature set!" />
+          </>
+        ) : (
+          <>
+            <BetterButton
+              buttonText="Set Temperature"
+              handlePress={this.handleTempSetPress}
+            />
+          </>
+        )}
       </View>
     );
   }
@@ -179,4 +223,5 @@ const styles = StyleSheet.create({
     alignItems: 'stretch',
     justifyContent: 'center',
   },
+  notificationText: {},
 });
