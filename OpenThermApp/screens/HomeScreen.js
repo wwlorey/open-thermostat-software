@@ -223,5 +223,8 @@ const styles = StyleSheet.create({
     alignItems: 'stretch',
     justifyContent: 'center',
   },
-  notificationText: {},
+  notificationText: {
+    fontSize: 18,
+    color: 'green',
+  },
 });
