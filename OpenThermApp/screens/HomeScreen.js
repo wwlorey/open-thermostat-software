@@ -48,7 +48,7 @@ class TemperatureSlider extends React.Component {
           maximumValue={100}
           step={1}
         />
-        <Text>Set Temperature: {this.state.value}</Text>
+        <Text style={styles.sliderText}>Temperature will be set to <Text style={{fontWeight: "bold"}}>{this.state.value}</Text></Text>
       </View>
     );
   }
@@ -222,6 +222,10 @@ const styles = StyleSheet.create({
     marginRight: 10,
     alignItems: 'stretch',
     justifyContent: 'center',
+  },
+  sliderText: {
+    textAlign: 'center',
+    paddingBottom: 20,
   },
   notificationText: {
     fontSize: 18,
