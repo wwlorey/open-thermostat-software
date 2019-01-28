@@ -142,8 +142,10 @@ class ControlVerbage extends React.Component {
         ) : tempSetState === TEMP_SET_STATES.IN_PROGRESS ? (
           <>
             {/*<TemperatureSlider passUpValue={this.updateNewTempValue} beginningValue={this.state.newTempValue} />*/}
-            <IncDecButton passUpChange={this.updateNewTempValue} viewStyle={styles.minusButton} displayChar='-' />
-            <IncDecButton passUpChange={this.updateNewTempValue} viewStyle={styles.plusButton}  displayChar='+' />
+            <View style={styles.incDecButtonContainer}>
+              <IncDecButton passUpChange={this.updateNewTempValue} viewStyle={styles.incDecButton} displayChar='-' />
+              <IncDecButton passUpChange={this.updateNewTempValue} viewStyle={styles.incDecButton}  displayChar='+' />
+            </View>
             <BetterButton
               buttonText="Done"
               handlePress={this.handleDonePress}
@@ -276,7 +278,27 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: 'green',
   },
-  minusButton: {},
-  plusButton: {},
-  incDecText: {},
+  incDecButtonContainer: {
+    flex: 1,
+    width: 300,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    paddingBottom: 30,
+  },
+  incDecButton: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#0052a5',
+    margin: 20,
+    height: 70,
+    width: 70,
+    borderRadius: 70,
+  },
+  incDecText: {
+    fontSize: 30,
+    color: 'white',
+    paddingBottom: 40,
+  },
 });
