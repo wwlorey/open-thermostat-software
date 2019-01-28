@@ -108,7 +108,6 @@ class ControlVerbage extends React.Component {
   handleDonePress = () => {
     this.setState({ tempSetState: TEMP_SET_STATES.POST });
     this.beginNotificationDeath();
-    this.props.passUpValue(this.state.tempValue);
   };
 
   beginNotificationDeath = () => {
@@ -119,13 +118,10 @@ class ControlVerbage extends React.Component {
   }
 
   updateNewTempValue = (type) => {
-    if (type == '-') {
-      this.setState({ tempValue: this.state.tempValue - 1});
-    }
-    else {
-      // Default to plus (+)
-      this.setState({ tempValue: this.state.tempValue + 1});  
-    }
+    tempValue = this.state.tempValue + (type == '-' ? -1 : 1);
+
+    this.props.passUpValue(tempValue);
+    this.setState({ tempValue });
   }
 
   render() {
@@ -179,8 +175,8 @@ export default class HomeScreen extends React.Component {
 
   static navigationOptions = { header: null };
 
-  updateTemperatureValue = (value) => {
-    this.setState({temperature: value});
+  updateTemperatureValue = (temperature) => {
+    this.setState({ temperature });
   }
 
   render() {
