@@ -32,6 +32,22 @@ function BetterButton({ buttonText, handlePress }) {
   );
 }
 
+class IncDecButton extends React.Component {
+  handlePress = () => {
+    this.props.passUpChange(this.props.displayChar)
+  }
+
+  render() {
+    return (
+      <TouchableHighlight onPress={this.handlePress} underlayColor="white">  
+        <View style={this.props.viewStyle}>
+          <Text style={styles.incDecText}>{this.props.displayChar}</Text>
+        </View>
+      </TouchableHighlight>
+    );
+  }
+}
+
 class TemperatureSlider extends React.Component {
   constructor(props) {
     super(props);
@@ -79,7 +95,7 @@ class ControlVerbage extends React.Component {
   state = {
     tempSetState: TEMP_SET_STATES.PRE,
     notificationVisible: true,
-    newTempValue: DEFAULT_TEMPERATURE,
+    tempValue: DEFAULT_TEMPERATURE,
   };
 
   handleTempSetPress = () => {
@@ -92,7 +108,7 @@ class ControlVerbage extends React.Component {
   handleDonePress = () => {
     this.setState({ tempSetState: TEMP_SET_STATES.POST });
     this.beginNotificationDeath();
-    this.props.passUpValue(this.state.newTempValue);
+    this.props.passUpValue(this.state.tempValue);
   };
 
   beginNotificationDeath = () => {
@@ -102,8 +118,14 @@ class ControlVerbage extends React.Component {
     }, NOTIFICATION_TIMEOUT * 1000);
   }
 
-  updateNewTempValue = (newTempValue) => {
-    this.setState({ newTempValue });
+  updateNewTempValue = (type) => {
+    if (type == '-') {
+      this.setState({ tempValue: this.state.tempValue - 1});
+    }
+    else {
+      // Default to plus (+)
+      this.setState({ tempValue: this.state.tempValue + 1});  
+    }
   }
 
   render() {
@@ -119,7 +141,9 @@ class ControlVerbage extends React.Component {
           />
         ) : tempSetState === TEMP_SET_STATES.IN_PROGRESS ? (
           <>
-            <TemperatureSlider passUpValue={this.updateNewTempValue} beginningValue={this.state.newTempValue} />
+            {/*<TemperatureSlider passUpValue={this.updateNewTempValue} beginningValue={this.state.newTempValue} />*/}
+            <IncDecButton passUpChange={this.updateNewTempValue} viewStyle={styles.minusButton} displayChar='-' />
+            <IncDecButton passUpChange={this.updateNewTempValue} viewStyle={styles.plusButton}  displayChar='+' />
             <BetterButton
               buttonText="Done"
               handlePress={this.handleDonePress}
@@ -252,4 +276,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: 'green',
   },
+  minusButton: {},
+  plusButton: {},
+  incDecText: {},
 });
