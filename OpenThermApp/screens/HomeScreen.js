@@ -32,6 +32,22 @@ function BetterButton({ buttonText, handlePress }) {
   );
 }
 
+class IncDecButton extends React.Component {
+  handlePress = () => {
+    this.props.passUpChange(this.props.displayChar)
+  }
+
+  render() {
+    return (
+      <TouchableHighlight onPress={this.handlePress} underlayColor="white">  
+        <View style={this.props.viewStyle}>
+          <Text style={styles.incDecText}>{this.props.displayChar}</Text>
+        </View>
+      </TouchableHighlight>
+    );
+  }
+}
+
 class TemperatureSlider extends React.Component {
   constructor(props) {
     super(props);
@@ -79,7 +95,7 @@ class ControlVerbage extends React.Component {
   state = {
     tempSetState: TEMP_SET_STATES.PRE,
     notificationVisible: true,
-    newTempValue: DEFAULT_TEMPERATURE,
+    tempValue: DEFAULT_TEMPERATURE,
   };
 
   handleTempSetPress = () => {
@@ -92,7 +108,6 @@ class ControlVerbage extends React.Component {
   handleDonePress = () => {
     this.setState({ tempSetState: TEMP_SET_STATES.POST });
     this.beginNotificationDeath();
-    this.props.passUpValue(this.state.newTempValue);
   };
 
   beginNotificationDeath = () => {
@@ -102,8 +117,11 @@ class ControlVerbage extends React.Component {
     }, NOTIFICATION_TIMEOUT * 1000);
   }
 
-  updateNewTempValue = (newTempValue) => {
-    this.setState({ newTempValue });
+  updateNewTempValue = (type) => {
+    tempValue = this.state.tempValue + (type == '-' ? -1 : 1);
+
+    this.props.passUpValue(tempValue);
+    this.setState({ tempValue });
   }
 
   render() {
@@ -119,7 +137,11 @@ class ControlVerbage extends React.Component {
           />
         ) : tempSetState === TEMP_SET_STATES.IN_PROGRESS ? (
           <>
-            <TemperatureSlider passUpValue={this.updateNewTempValue} beginningValue={this.state.newTempValue} />
+            {/*<TemperatureSlider passUpValue={this.updateNewTempValue} beginningValue={this.state.newTempValue} />*/}
+            <View style={styles.incDecButtonContainer}>
+              <IncDecButton passUpChange={this.updateNewTempValue} viewStyle={styles.incDecButton} displayChar='-' />
+              <IncDecButton passUpChange={this.updateNewTempValue} viewStyle={styles.incDecButton}  displayChar='+' />
+            </View>
             <BetterButton
               buttonText="Done"
               handlePress={this.handleDonePress}
@@ -153,8 +175,8 @@ export default class HomeScreen extends React.Component {
 
   static navigationOptions = { header: null };
 
-  updateTemperatureValue = (value) => {
-    this.setState({temperature: value});
+  updateTemperatureValue = (temperature) => {
+    this.setState({ temperature });
   }
 
   render() {
@@ -251,5 +273,28 @@ const styles = StyleSheet.create({
   notificationText: {
     fontSize: 18,
     color: 'green',
+  },
+  incDecButtonContainer: {
+    flex: 1,
+    width: 300,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    paddingBottom: 30,
+  },
+  incDecButton: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#0052a5',
+    margin: 20,
+    height: 70,
+    width: 70,
+    borderRadius: 70,
+  },
+  incDecText: {
+    fontSize: 30,
+    color: 'white',
+    paddingBottom: 40,
   },
 });
