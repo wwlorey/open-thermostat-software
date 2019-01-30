@@ -13,6 +13,12 @@ const TEMP_SET_STATES = Object.freeze({ PRE: 1, IN_PROGRESS: 2, POST: 3 });
 const DEFAULT_TEMPERATURE = 69;
 const NOTIFICATION_TIMEOUT = 3;
 
+function TemperatureLabel({ labelType }) {
+  return (
+    <Text style={styles.temperatureLabelText}>{(labelType == 'set') ? 'Temperature will be set to' : 'Current Temperature'}</Text>
+  );
+}
+
 function Temperature({ value }) {
   return (
     <View style={styles.temperatureContainer}>
@@ -103,11 +109,13 @@ class ControlVerbage extends React.Component {
 
     // Ensure residual notification timeout is cleared
     clearTimeout(this.notificationTimeoutHandle);
+    this.props.startSet();
   };
 
   handleDonePress = () => {
     this.setState({ tempSetState: TEMP_SET_STATES.POST });
     this.beginNotificationDeath();
+    this.props.endSet();
   };
 
   beginNotificationDeath = () => {
@@ -171,12 +179,21 @@ class ControlVerbage extends React.Component {
 export default class HomeScreen extends React.Component {
   state = {
     temperature: DEFAULT_TEMPERATURE,
+    labelType: 'current',
   };
 
   static navigationOptions = { header: null };
 
   updateTemperatureValue = (temperature) => {
     this.setState({ temperature });
+  }
+  
+  startSet = () => {
+    this.setState({ labelType: 'set' });
+  }
+
+  endSet = () => {
+    this.setState({ labelType: 'current' });
   }
 
   render() {
@@ -188,11 +205,12 @@ export default class HomeScreen extends React.Component {
           scrollEnabled={false}
         >
           <View style={styles.header}>
-            <Temperature value={this.state.temperature}/>
+            <TemperatureLabel labelType={this.state.labelType} />
+            <Temperature value={this.state.temperature} />
           </View>
 
           <View style={styles.controlBody}>
-            <ControlVerbage passUpValue={this.updateTemperatureValue} />
+            <ControlVerbage startSet={this.startSet} endSet={this.endSet} passUpValue={this.updateTemperatureValue} />
             <View style={styles.controlBackground} />
           </View>
         </ScrollView>
@@ -213,9 +231,13 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
   },
+  temperatureLabelText: {
+    marginTop: 40,
+    fontSize: 25,
+  },
   temperatureContainer: {
-    paddingTop: 40,
-    paddingBottom: 20,
+    marginTop: 0,
+    marginBottom: 10,
     flexDirection: 'row',
   },
   temperatureText: {
@@ -223,7 +245,7 @@ const styles = StyleSheet.create({
   },
   temperatureUnit: {
     fontSize: 30,
-    paddingTop: 45,
+    marginTop: 45,
   },
   controlBody: {
     flex: 1,
