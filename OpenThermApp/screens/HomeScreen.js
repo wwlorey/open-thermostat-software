@@ -38,6 +38,14 @@ function BetterButton({ buttonText, handlePress }) {
   );
 }
 
+function SetTemp({ value, visible }) {
+  return (
+    visible ? 
+    <Text>Set Temp: {value}</Text> :
+    <></>
+  );
+}
+
 class IncDecButton extends React.Component {
   handlePress = () => {
     this.props.passUpChange(this.props.displayChar)
@@ -150,6 +158,8 @@ export default class HomeScreen extends React.Component {
   state = {
     temperature: DEFAULT_TEMPERATURE,
     labelType: 'current',
+    setTempExists: false,
+    setTempValue: null,
   };
 
   static navigationOptions = { header: null };
@@ -159,11 +169,11 @@ export default class HomeScreen extends React.Component {
   }
   
   startTempSetProcess = () => {
-    this.setState({ labelType: 'set' });
+    this.setState({ labelType: 'set', setTempExists: false });
   }
 
   endTempSetProcess = () => {
-    this.setState({ labelType: 'current' });
+    this.setState({ labelType: 'current', setTempExists: true, setTempValue: DEFAULT_TEMPERATURE }); // TODO: actually update set temp
   }
 
   render() {
@@ -181,6 +191,7 @@ export default class HomeScreen extends React.Component {
 
           <View style={styles.controlBody}>
             <ControlVerbage startTempSetProcess={this.startTempSetProcess} endTempSetProcess={this.endTempSetProcess} passUpValue={this.updateTemperatureValue} />
+            <SetTemp value={this.state.setTempValue} visible={this.state.setTempExists} />
             <View style={styles.controlBackground} />
           </View>
         </ScrollView>
