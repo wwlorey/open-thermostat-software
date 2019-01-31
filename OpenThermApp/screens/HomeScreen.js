@@ -80,13 +80,13 @@ class ControlVerbage extends React.Component {
 
     // Ensure residual notification timeout is cleared
     clearTimeout(this.notificationTimeoutHandle);
-    this.props.startSet();
+    this.props.startTempSetProcess();
   };
 
   handleDonePress = () => {
     this.setState({ tempSetState: TEMP_SET_STATES.POST });
     this.beginNotificationDeath();
-    this.props.endSet();
+    this.props.endTempSetProcess();
   };
 
   beginNotificationDeath = () => {
@@ -158,11 +158,11 @@ export default class HomeScreen extends React.Component {
     this.setState({ temperature });
   }
   
-  startSet = () => {
+  startTempSetProcess = () => {
     this.setState({ labelType: 'set' });
   }
 
-  endSet = () => {
+  endTempSetProcess = () => {
     this.setState({ labelType: 'current' });
   }
 
@@ -180,7 +180,7 @@ export default class HomeScreen extends React.Component {
           </View>
 
           <View style={styles.controlBody}>
-            <ControlVerbage startSet={this.startSet} endSet={this.endSet} passUpValue={this.updateTemperatureValue} />
+            <ControlVerbage startTempSetProcess={this.startTempSetProcess} endTempSetProcess={this.endTempSetProcess} passUpValue={this.updateTemperatureValue} />
             <View style={styles.controlBackground} />
           </View>
         </ScrollView>
