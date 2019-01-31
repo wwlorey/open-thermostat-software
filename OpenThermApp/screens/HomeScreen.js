@@ -54,35 +54,6 @@ class IncDecButton extends React.Component {
   }
 }
 
-class TemperatureSlider extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { value: this.props.beginningValue };
-    this.props.passUpValue(this.state.value);
-  }
-
-  handleValueChange(value) {
-    this.setState({ value });
-    this.props.passUpValue(this.state.value);
-  }
-
-  render() {
-    return (
-      <View style={styles.sliderContainer}>
-        <Slider
-          value={this.state.value}
-          onValueChange={value => this.setState({ value })}
-          onSlidingComplete={this.handleValueChange.bind(this)}
-          minimumValue={50}
-          maximumValue={100}
-          step={1}
-        />
-        <Text style={styles.sliderText}>Temperature will be set to <Text style={{fontWeight: "bold"}}>{this.state.value}</Text></Text>
-      </View>
-    );
-  }
-}
-
 class Notification extends React.Component {
   state = {
     visible: true
@@ -145,7 +116,6 @@ class ControlVerbage extends React.Component {
           />
         ) : tempSetState === TEMP_SET_STATES.IN_PROGRESS ? (
           <>
-            {/*<TemperatureSlider passUpValue={this.updateNewTempValue} beginningValue={this.state.newTempValue} />*/}
             <View style={styles.incDecButtonContainer}>
               <IncDecButton passUpChange={this.updateNewTempValue} viewStyle={styles.incDecButton} displayChar='-' />
               <IncDecButton passUpChange={this.updateNewTempValue} viewStyle={styles.incDecButton}  displayChar='+' />
