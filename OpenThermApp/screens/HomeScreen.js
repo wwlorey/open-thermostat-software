@@ -156,24 +156,25 @@ class ControlVerbage extends React.Component {
 
 export default class HomeScreen extends React.Component {
   state = {
-    temperature: DEFAULT_TEMPERATURE,
-    labelType: 'current',
-    setTempExists: false,
-    setTempValue: null,
+    tempState: 'current',
+    showSetTemp: false,
+    actualTemp: DEFAULT_TEMPERATURE,
+    setTemp: DEFAULT_TEMPERATURE,
+    displayTemp: DEFAULT_TEMPERATURE,
   };
 
   static navigationOptions = { header: null };
 
-  updateTemperatureValue = (temperature) => {
-    this.setState({ temperature });
+  updateTemperatureValue = (newTemp) => {
+    this.setState({ setTemp: newTemp, displayTemp: newTemp });
   }
-  
+
   startTempSetProcess = () => {
-    this.setState({ labelType: 'set', setTempExists: false });
+    this.setState({ tempState: 'set', showSetTemp: false, displayTemp: this.state.setTemp });
   }
 
   endTempSetProcess = () => {
-    this.setState({ labelType: 'current', setTempExists: true, setTempValue: DEFAULT_TEMPERATURE }); // TODO: actually update set temp
+    this.setState({ tempState: 'current', showSetTemp: true, displayTemp: this.state.actualTemp });
   }
 
   render() {
@@ -185,13 +186,13 @@ export default class HomeScreen extends React.Component {
           scrollEnabled={false}
         >
           <View style={styles.header}>
-            <TemperatureLabel labelType={this.state.labelType} />
-            <Temperature value={this.state.temperature} />
+            <TemperatureLabel labelType={this.state.tempState} />
+            <Temperature value={this.state.displayTemp} />
           </View>
 
           <View style={styles.controlBody}>
             <ControlVerbage startTempSetProcess={this.startTempSetProcess} endTempSetProcess={this.endTempSetProcess} passUpValue={this.updateTemperatureValue} />
-            <SetTemp value={this.state.setTempValue} visible={this.state.setTempExists} />
+            <SetTemp value={this.state.setTemp} visible={this.state.showSetTemp} />
             <View style={styles.controlBackground} />
           </View>
         </ScrollView>
