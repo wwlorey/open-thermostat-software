@@ -174,7 +174,14 @@ export default class HomeScreen extends React.Component {
   }
 
   endTempSetProcess = () => {
-    this.setState({ tempState: 'current', showSetTemp: true, displayTemp: this.state.actualTemp });
+    if (this.state.actualTemp == this.state.setTemp) {
+      this.setState({ showSetTemp: false });
+    }
+    else {
+      this.setState({ showSetTemp: true });  
+    }
+
+    this.setState({ tempState: 'current', displayTemp: this.state.actualTemp });
   }
 
   render() {
