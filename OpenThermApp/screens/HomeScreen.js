@@ -41,7 +41,9 @@ function BetterButton({ buttonText, handlePress }) {
 function SetTemp({ value, visible }) {
   return (
     visible ? 
-    <Text>Set Temp: {value}</Text> :
+    <View style={styles.setTempContainer}>
+      <Text style={styles.setTempText}>Temperature Set Point: {value}</Text> 
+    </View> :
     <></>
   );
 }
@@ -178,7 +180,7 @@ export default class HomeScreen extends React.Component {
       this.setState({ showSetTemp: false });
     }
     else {
-      this.setState({ showSetTemp: true });  
+      this.setState({ showSetTemp: true });
     }
 
     this.setState({ tempState: 'current', displayTemp: this.state.actualTemp });
@@ -269,17 +271,19 @@ const styles = StyleSheet.create({
     fontSize: 23,
     color: 'white',
   },
-  sliderContainer: {
-    flex: 1,
-    width: 300,
-    marginLeft: 10,
-    marginRight: 10,
-    alignItems: 'stretch',
+  setTempContainer: {
+    alignItems: 'center',
     justifyContent: 'center',
+    flex: 1,
+    zIndex: 1,
+    padding: 5,
+    bottom: -0.5 * Dimensions.get('window').height,
   },
-  sliderText: {
+  setTempText: {
+    width: 250,
+    backgroundColor: 'white',
     textAlign: 'center',
-    paddingBottom: 20,
+    fontSize: 20,
   },
   notificationText: {
     fontSize: 18,
