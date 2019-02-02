@@ -117,6 +117,7 @@ class ControlVerbage extends React.Component {
     notificationVisible: true,
     timerVisible: false,
     tempValue: DEFAULT_TEMPERATURE,
+    timerChanged: false,
   };
 
   handleTempSetPress = () => {
@@ -128,7 +129,17 @@ class ControlVerbage extends React.Component {
   };
 
   handleDonePress = () => {
-    this.setState({ tempSetState: TEMP_SET_STATES.POST });
+    this.setState({ tempSetState: TEMP_SET_STATES.POST, timerVisible: false });
+
+    if (!this.state.timerChanged) {
+      // Clear any timer that may exist
+      this.handleTimerSliderChange(0);
+    }
+    else {
+      // Reset for future temperature changes
+      this.setState({ timerChanged: false });
+    }
+
     this.beginNotificationDeath();
     this.props.endTempSetProcess();
   };
@@ -139,6 +150,7 @@ class ControlVerbage extends React.Component {
   
   handleTimerSliderChange= (time) => {
     this.props.passUpTimerValue(time);
+    this.setState({ timerChanged: true });
   };
 
   beginNotificationDeath = () => {
@@ -177,7 +189,7 @@ class ControlVerbage extends React.Component {
               handlePress={this.handleDonePress}
             />
             <BetterButton
-              buttonText="Use a timer?"
+              buttonText="Use a timer"
               handlePress={this.handleTimerPress}
             />
           </>
