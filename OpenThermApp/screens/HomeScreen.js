@@ -38,14 +38,47 @@ function BetterButton({ buttonText, handlePress }) {
   );
 }
 
-function SetTemp({ value, visible }) {
+function SetTempTimerNotification({ tempValue, tempVisible, timerValue }) {
   return (
-    visible ? 
+    (tempVisible && timerValue > 0) ? 
     <View style={styles.setTempContainer}>
-      <Text style={styles.setTempText}>Temperature Set Point: {value}</Text> 
+      <Text style={styles.setTempText}>Temperature set point: {tempValue}</Text> 
+      <Text style={styles.setTempText}>will take effect in {timerValue} hours</Text> 
+    </View> : tempVisible ?
+    <View style={styles.setTempContainer}>
+      <Text style={styles.setTempText}>Temperature set point: {tempValue}</Text> 
     </View> :
     <></>
   );
+}
+
+class TimerSlider extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { value: this.props.beginningValue };
+    this.props.passUpValue(this.state.value);
+  }
+
+  handleValueChange(value) {
+    this.setState({ value });
+    this.props.passUpValue(this.state.value);
+  }
+
+  render() {
+    return (
+      <View style={styles.sliderContainer}>
+        <Slider
+          value={this.state.value}
+          onValueChange={value => this.setState({ value })}
+          onSlidingComplete={this.handleValueChange.bind(this)}
+          minimumValue={0}
+          maximumValue={12}
+          step={0.5}
+        />
+        <Text style={styles.sliderText}>Temperature won't take effect for <Text style={{fontWeight: "bold"}}>{this.state.value}</Text> hours.</Text>
+      </View>
+    );
+  }
 }
 
 class IncDecButton extends React.Component {
@@ -82,6 +115,7 @@ class ControlVerbage extends React.Component {
   state = {
     tempSetState: TEMP_SET_STATES.PRE,
     notificationVisible: true,
+    timerVisible: false,
     tempValue: DEFAULT_TEMPERATURE,
   };
 
@@ -98,6 +132,14 @@ class ControlVerbage extends React.Component {
     this.beginNotificationDeath();
     this.props.endTempSetProcess();
   };
+  
+  handleTimerPress = () => {
+    this.setState({ timerVisible: true });
+  };
+  
+  handleTimerSliderChange= (time) => {
+    this.props.passUpTimerValue(time);
+  };
 
   beginNotificationDeath = () => {
     // Stop displaying notification after NOTIFICATION_TIMEOUT seconds
@@ -109,7 +151,7 @@ class ControlVerbage extends React.Component {
   updateNewTempValue = (type) => {
     tempValue = this.state.tempValue + (type == '-' ? -1 : 1);
 
-    this.props.passUpValue(tempValue);
+    this.props.passUpTempValue(tempValue);
     this.setState({ tempValue });
   }
 
@@ -124,7 +166,7 @@ class ControlVerbage extends React.Component {
             buttonText="Set Temperature"
             handlePress={this.handleTempSetPress}
           />
-        ) : tempSetState === TEMP_SET_STATES.IN_PROGRESS ? (
+        ) : tempSetState === TEMP_SET_STATES.IN_PROGRESS && !this.state.timerVisible ? (
           <>
             <View style={styles.incDecButtonContainer}>
               <IncDecButton passUpChange={this.updateNewTempValue} viewStyle={styles.incDecButton} displayChar='-' />
@@ -133,6 +175,25 @@ class ControlVerbage extends React.Component {
             <BetterButton
               buttonText="Done"
               handlePress={this.handleDonePress}
+            />
+            <BetterButton
+              buttonText="Use a timer?"
+              handlePress={this.handleTimerPress}
+            />
+          </>
+        ) : tempSetState === TEMP_SET_STATES.IN_PROGRESS && this.state.timerVisible ? (
+          <>
+            <View style={styles.incDecButtonContainer}>
+              <IncDecButton passUpChange={this.updateNewTempValue} viewStyle={styles.incDecButton} displayChar='-' />
+              <IncDecButton passUpChange={this.updateNewTempValue} viewStyle={styles.incDecButton}  displayChar='+' />
+            </View>
+            <BetterButton
+              buttonText="Done"
+              handlePress={this.handleDonePress}
+            />
+            <TimerSlider 
+              beginningValue={0.5}
+              passUpValue={this.handleTimerSliderChange}
             />
           </>
         ) : tempSetState == TEMP_SET_STATES.POST && notificationVisible ? (
@@ -163,12 +224,17 @@ export default class HomeScreen extends React.Component {
     actualTemp: DEFAULT_TEMPERATURE,
     setTemp: DEFAULT_TEMPERATURE,
     displayTemp: DEFAULT_TEMPERATURE,
+    initTimerValue: 0,
   };
 
   static navigationOptions = { header: null };
 
   updateTemperatureValue = (newTemp) => {
     this.setState({ setTemp: newTemp, displayTemp: newTemp });
+  }
+  
+  updateTimerValue = (initTimerValue) => {
+    this.setState({ initTimerValue });
   }
 
   startTempSetProcess = () => {
@@ -200,8 +266,16 @@ export default class HomeScreen extends React.Component {
           </View>
 
           <View style={styles.controlBody}>
-            <ControlVerbage startTempSetProcess={this.startTempSetProcess} endTempSetProcess={this.endTempSetProcess} passUpValue={this.updateTemperatureValue} />
-            <SetTemp value={this.state.setTemp} visible={this.state.showSetTemp} />
+            <ControlVerbage startTempSetProcess={this.startTempSetProcess} 
+              endTempSetProcess={this.endTempSetProcess} 
+              passUpTempValue={this.updateTemperatureValue} 
+              passUpTimerValue={this.updateTimerValue}
+            />
+            <SetTempTimerNotification 
+              tempValue={this.state.setTemp} 
+              tempVisible={this.state.showSetTemp} 
+              timerValue={this.state.initTimerValue}
+            />
             <View style={styles.controlBackground} />
           </View>
         </ScrollView>
