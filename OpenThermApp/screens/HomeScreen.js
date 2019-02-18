@@ -16,6 +16,7 @@ const NOTIFICATION_TIMEOUT = 3;
 // Blynk server communication example
 fetch('http://45.32.59.202:8080/31a9ac8830f54853bcd7f4d01e17a0fd/isAppConnected').then(response => console.log(response)).catch(error => console.log(error));
 fetch('http://45.32.59.202:8080/31a9ac8830f54853bcd7f4d01e17a0fd/update/V0?value=heck').then(response => console.log(response)).catch(error => console.log(error));
+fetch('http://45.32.59.202:8080/31a9ac8830f54853bcd7f4d01e17a0fd/get/V2').then(response => console.log(response)).catch(error => console.log(error));
 
 function TemperatureLabel({ labelType }) {
   return (
