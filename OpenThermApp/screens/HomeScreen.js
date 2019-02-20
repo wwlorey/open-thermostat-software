@@ -8,15 +8,29 @@ import {
   TouchableHighlight,
   View,
 } from 'react-native';
+import * as Secrets from "../Secrets"
 
 const TEMP_SET_STATES = Object.freeze({ PRE: 1, IN_PROGRESS: 2, POST: 3 });
 const DEFAULT_TEMPERATURE = 69;
 const NOTIFICATION_TIMEOUT = 3;
 
-// Blynk server communication example
-fetch('http://45.32.59.202:8080/31a9ac8830f54853bcd7f4d01e17a0fd/isAppConnected').then(response => console.log(response)).catch(error => console.log(error));
-fetch('http://45.32.59.202:8080/31a9ac8830f54853bcd7f4d01e17a0fd/update/V0?value=heck').then(response => console.log(response)).catch(error => console.log(error));
-fetch('http://45.32.59.202:8080/31a9ac8830f54853bcd7f4d01e17a0fd/get/V2').then(response => console.log(response)).catch(error => console.log(error));
+function buildRequest(type, pin, value=null) {
+  if (type == 'GET') {
+    request = 'get/' + pin;
+  }
+  else { // type == 'UPDATE' || type == 'SET'
+    request = 'update/' + pin + '?value=' + value;
+  }
+
+  return 'http://' + Secrets.getServerAddr() + ':' + Secrets.getPort() + '/' + Secrets.getAuthToken() + '/' + request;
+}
+
+function makeRequest(url) {
+  fetch(url)
+    .then(response => console.log(response))
+    .catch(error => console.log(error));
+}
+
 
 function TemperatureLabel({ labelType }) {
   return (
