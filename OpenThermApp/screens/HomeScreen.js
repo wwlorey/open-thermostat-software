@@ -13,6 +13,7 @@ import * as Secrets from "../Secrets"
 const TEMP_SET_STATES = Object.freeze({ PRE: 1, IN_PROGRESS: 2, POST: 3 });
 const DEFAULT_TEMPERATURE = 69;
 const NOTIFICATION_TIMEOUT = 3;
+const TEMP_PIN = 'V0'; // Temperature virtual pin
 
 function buildRequest(type, pin, value=null) {
   if (type == 'GET') {
@@ -25,12 +26,23 @@ function buildRequest(type, pin, value=null) {
   return 'http://' + Secrets.getServerAddr() + ':' + Secrets.getPort() + '/' + Secrets.getAuthToken() + '/' + request;
 }
 
-function makeRequest(url) {
-  fetch(url)
-    .then(response => console.log(response))
-    .catch(error => console.log(error));
+function makeRequest(request) {
+  return fetch(request)
+    .then((response) => response.json())
+    .then(function(responseJson) {
+      return responseJson[0];
+  });
 }
 
+function updateTemperature(newTemp) {
+  request = buildRequest('UPDATE', TEMP_PIN, newTemp);
+  makeRequest(request);
+}
+
+function getTemperature() {
+  request = buildRequest('GET', TEMP_PIN);
+  return makeRequest(request);
+}
 
 function TemperatureLabel({ labelType }) {
   return (
@@ -249,17 +261,24 @@ class ControlVerbage extends React.Component {
 }
 
 export default class HomeScreen extends React.Component {
-  state = {
-    tempState: 'current',
-    showSetTemp: false,
-    actualTemp: DEFAULT_TEMPERATURE,
-    setTemp: DEFAULT_TEMPERATURE,
-    displayTemp: DEFAULT_TEMPERATURE,
-    initTimerValue: 0,
+  state = {  
+      tempState: 'current',
+      showSetTemp: false,
+      actualTemp: null,
+      setTemp: null,
+      displayTemp: null,
+      initTimerValue: 0,
   };
 
   static navigationOptions = { header: null };
 
+  componentDidMount() {
+    // Save the current temperature from server to the state
+    getTemperature().then((temp) => { 
+      this.setState({ actualTemp: temp, setTemp: temp, displayTemp: temp }); 
+    });
+  }
+  
   updateTemperatureValue = (newTemp) => {
     this.setState({ setTemp: newTemp, displayTemp: newTemp });
   }
