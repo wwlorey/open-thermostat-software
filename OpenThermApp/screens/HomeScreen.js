@@ -16,12 +16,15 @@ const NOTIFICATION_TIMEOUT = 3;
 const TEMP_PIN = 'V0';     // Temperature virtual pin
 const SET_TEMP_PIN = 'V1'; // Set temperature virtual pin
 
-function buildRequest(type, pin, value=null) {
+function buildRequest(type, pin=null, value=null) {
   if (type == 'GET') {
     request = 'get/' + pin;
   }
-  else { // type == 'UPDATE' || type == 'SET'
+  else if (type == 'UPDATE' || type == 'SET') {
     request = 'update/' + pin + '?value=' + value;
+  }
+  else { // type == 'CHECK_CONN'
+    request = 'isAppConnected'
   }
 
   return 'http://' + Secrets.getServerAddr() + ':' + Secrets.getPort() + '/' + Secrets.getAuthToken() + '/' + request;
@@ -48,6 +51,11 @@ function getSetTemperature() {
 function updateSetTemperature(newTemp) {
   request = buildRequest('UPDATE', SET_TEMP_PIN, newTemp);
   makeRequest(request);
+}
+
+function checkServerConnection() {
+  request = buildRequest('CHECK_CONN');
+  return makeRequest(request);
 }
 
 function TemperatureLabel({ labelType }) {
@@ -217,7 +225,9 @@ class ControlVerbage extends React.Component {
 
     return (
       <View style={styles.controlVerbage}>
-        {tempSetState === TEMP_SET_STATES.PRE ? (
+        {this.props.displayError ? (
+          <Text style={styles.errorMessage}>Woah there buddy! Something went wrong.</Text>
+        ) : tempSetState === TEMP_SET_STATES.PRE ? (
           <BetterButton
             buttonText="Set Temperature"
             handlePress={this.handleTempSetPress}
@@ -281,11 +291,16 @@ export default class HomeScreen extends React.Component {
       setTemp: DEFAULT_TEMPERATURE,
       displayTemp: DEFAULT_TEMPERATURE,
       initTimerValue: 0,
+      connError: false,
   };
 
   static navigationOptions = { header: null };
 
   componentDidMount() {
+    checkServerConnection().catch((conn) => {
+      this.setState({ connError: true });
+    });
+
     // Save the current temperature & set temperature from server to the state
     getHomeTemperature().then((temp) => { 
       temp = parseInt(temp);
@@ -339,10 +354,12 @@ export default class HomeScreen extends React.Component {
           </View>
 
           <View style={styles.controlBody}>
-            <ControlVerbage startTempSetProcess={this.startTempSetProcess} 
+            <ControlVerbage 
+              startTempSetProcess={this.startTempSetProcess} 
               endTempSetProcess={this.endTempSetProcess} 
               passUpTempValue={this.updateTemperatureValue} 
               passUpTimerValue={this.updateTimerValue}
+              displayError={this.state.connError}
             />
             <SetTempTimerNotification 
               tempValue={this.state.setTemp} 
@@ -459,4 +476,9 @@ const styles = StyleSheet.create({
     color: 'white',
     paddingBottom: 40,
   },
+  errorMessage: {
+    fontSize: 25,
+    textAlign: 'center',
+    padding: 50,
+  }
 });
