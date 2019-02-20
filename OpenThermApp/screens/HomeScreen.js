@@ -11,7 +11,7 @@ import {
 import * as Secrets from "../Secrets"
 
 const TEMP_SET_STATES = Object.freeze({ PRE: 1, IN_PROGRESS: 2, POST: 3 });
-const DEFAULT_TEMPERATURE = 69;
+const DEFAULT_TEMPERATURE = '😂';
 const NOTIFICATION_TIMEOUT = 3;
 const TEMP_PIN = 'V0'; // Temperature virtual pin
 
@@ -151,6 +151,13 @@ class ControlVerbage extends React.Component {
     timerChanged: false,
   };
 
+  componentDidMount() {
+    // Save the current temperature from server to the state
+    getTemperature().then((temp) => { 
+      this.setState({ tempValue: parseInt(temp) }); 
+    });
+  }
+
   handleTempSetPress = () => {
     this.setState({ tempSetState: TEMP_SET_STATES.IN_PROGRESS, notificationVisible: true });
 
@@ -264,9 +271,9 @@ export default class HomeScreen extends React.Component {
   state = {  
       tempState: 'current',
       showSetTemp: false,
-      actualTemp: null,
-      setTemp: null,
-      displayTemp: null,
+      actualTemp: DEFAULT_TEMPERATURE,
+      setTemp: DEFAULT_TEMPERATURE,
+      displayTemp: DEFAULT_TEMPERATURE,
       initTimerValue: 0,
   };
 
@@ -275,6 +282,7 @@ export default class HomeScreen extends React.Component {
   componentDidMount() {
     // Save the current temperature from server to the state
     getTemperature().then((temp) => { 
+      temp = parseInt(temp);
       this.setState({ actualTemp: temp, setTemp: temp, displayTemp: temp }); 
     });
   }
