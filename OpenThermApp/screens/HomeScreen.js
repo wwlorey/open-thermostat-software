@@ -13,7 +13,8 @@ import * as Secrets from "../Secrets"
 const TEMP_SET_STATES = Object.freeze({ PRE: 1, IN_PROGRESS: 2, POST: 3 });
 const DEFAULT_TEMPERATURE = '😂';
 const NOTIFICATION_TIMEOUT = 3;
-const TEMP_PIN = 'V0'; // Temperature virtual pin
+const TEMP_PIN = 'V0';     // Temperature virtual pin
+const SET_TEMP_PIN = 'V1'; // Set temperature virtual pin
 
 function buildRequest(type, pin, value=null) {
   if (type == 'GET') {
@@ -34,14 +35,19 @@ function makeRequest(request) {
   });
 }
 
-function updateTemperature(newTemp) {
-  request = buildRequest('UPDATE', TEMP_PIN, newTemp);
-  makeRequest(request);
-}
-
-function getTemperature() {
+function getHomeTemperature() {
   request = buildRequest('GET', TEMP_PIN);
   return makeRequest(request);
+}
+
+function getSetTemperature() {
+  request = buildRequest('GET', SET_TEMP_PIN);
+  return makeRequest(request);
+}
+
+function updateSetTemperature(newTemp) {
+  request = buildRequest('UPDATE', SET_TEMP_PIN, newTemp);
+  makeRequest(request);
 }
 
 function TemperatureLabel({ labelType }) {
@@ -153,7 +159,7 @@ class ControlVerbage extends React.Component {
 
   componentDidMount() {
     // Save the current temperature from server to the state
-    getTemperature().then((temp) => { 
+    getHomeTemperature().then((temp) => { 
       this.setState({ tempValue: parseInt(temp) }); 
     });
   }
@@ -280,10 +286,17 @@ export default class HomeScreen extends React.Component {
   static navigationOptions = { header: null };
 
   componentDidMount() {
-    // Save the current temperature from server to the state
-    getTemperature().then((temp) => { 
+    // Save the current temperature & set temperature from server to the state
+    getHomeTemperature().then((temp) => { 
       temp = parseInt(temp);
-      this.setState({ actualTemp: temp, setTemp: temp, displayTemp: temp }); 
+      this.setState({ actualTemp: temp, displayTemp: temp }); 
+    });
+    
+    getSetTemperature().then((temp) => {
+      temp = parseInt(temp);
+      
+      // Make sure the set temperature is displayed, if it exists
+      this.setState({ setTemp: temp }, () => this.endTempSetProcess());
     });
   }
   
@@ -300,6 +313,8 @@ export default class HomeScreen extends React.Component {
   }
 
   endTempSetProcess = () => {
+    updateSetTemperature(this.state.setTemp);
+
     if (this.state.actualTemp == this.state.setTemp) {
       this.setState({ showSetTemp: false });
     }
