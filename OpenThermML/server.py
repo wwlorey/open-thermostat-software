@@ -1,82 +1,48 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
+# Note: this module is written in Python 2 because that's what the Blynk docs use
+
+from _secrets import *
+from prediction import Prediction
+from urllib2 import Request, urlopen
+import time
 
 
-import configparser
-import socket
-import threading
+# Constants
+SET_TEMP_PIN = 'V1'  # Set temperature virtual pin
+HEADERS = {
+    'Content-Type': 'application/json'
+}
 
 
-def connectionHandler(clientSocket, addr):
-    while True:
-        try:
-            # Receive a message from the client
-            message = clientSocket.recv(2048).decode()
+def update_temperature(temperature):
+    """Sends the given temperature to the server."""
+    values = '[ "' + str(temperature) + '" ]'
 
-            if message != '\r\n':
-                try:
-                    # Assume we have a HTTP GET message
-                    filename = message.split()[1][1:]
-                except:
-                    # The client is sending unexpected messages. Break out of the loop
-                    break
+    request_str = 'http://' + server_addr + ':' + port + \
+        '/' + auth_token + '/update/' + SET_TEMP_PIN
 
-                print('File requested: ' + filename + ' ' + str(addr))
+    request = Request(request_str, data=values, headers=HEADERS)
+    request.get_method = lambda: 'PUT'
 
-                with open(filename, 'r') as f:
-                    outputdata = f.read()
+    print 'Temperature', str(temperature), 'sent to', request_str
 
-                # Send the HTTP header into the socket
-                clientSocket.send('HTTP/1.1 200 OK\r\n'.encode())
-                clientSocket.send('Content-Type: text/html\r\n'.encode())
-                clientSocket.send('Connection: keep-alive\r\n'.encode())
-                clientSocket.send(
-                    ('Content-Length: ' + str(len(outputdata.encode('utf-8'))) + '\r\n').encode())
-                clientSocket.send('\r\n'.encode())
-
-                # Send the content of the requested file to the client
-                clientSocket.send((outputdata + '\f\r\n').encode())
-
-        except IOError:
-            # Send response message for file not found
-            clientSocket.send('HTTP/1.1 404 Not Found\r\n'.encode())
-            clientSocket.send('\r\n'.encode())
-
-            # Close client socket and break out of the loop
-            print('Could not serve file ' + str(addr))
-            break
-
-    print('Closing client socket ' + str(addr))
-    clientSocket.close()
+    response_body = urlopen(request).read()
+    print response_body + '\n'
 
 
-# Initialize configuration
-config = configparser.ConfigParser()
-config.read('config.cfg')
-config = config['DEFAULT']
-
-serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-# Prepare a sever socket
-serverSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-serverSocket.bind((config['defaultServerAddr'], int(config['defaultPort'])))
-
-serverSocket.listen(int(config['backlog']))
-print('Ready to serve...')
-
-threads = []
+prediction = Prediction()
+prediction.load_backup()
 
 while True:
-    # Establish the connection
-    clientSocket, addr = serverSocket.accept()
-    print('Got connection from ' + str(addr))
-    newThread = threading.Thread(
-        target=connectionHandler, args=(clientSocket, addr))
-    newThread.start()
-    threads.append(newThread)
+    # Get the predicted temperature
+    set_point = prediction.get_prediction(False)
 
-# Join the threads and close the socket
-print('Server exiting.')
-for thread in threads:
-    thread.join()
-serverSocket.close()
+    # Tell the server about it
+    update_temperature(set_point)
+
+    # Backup the model
+    prediction.backup()
+
+    # Sleep for 30min
+    print 'Sleeping for 30min...'
+    time.sleep(60 * 30)

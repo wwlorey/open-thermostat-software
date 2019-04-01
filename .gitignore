@@ -1,4 +1,5 @@
 .DS_Store
 OpenThermApp/Secrets.js
+OpenThermML/_secrets.py
 .vscode
 *.pyc
