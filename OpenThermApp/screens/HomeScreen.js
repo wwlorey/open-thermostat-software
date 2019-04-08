@@ -14,8 +14,8 @@ const TEMP_SET_STATES = Object.freeze({ PRE: 1, IN_PROGRESS: 2, POST: 3 });
 const HOMESCREEN_STATES = Object.freeze({ CURRENT: 1, SET: 2 });
 const DEFAULT_TEMPERATURE = '😂';
 const NOTIFICATION_TIMEOUT = 3;
-const TEMP_PIN = 'V0';     // Temperature virtual pin
-const SET_TEMP_PIN = 'V1'; // Set temperature virtual pin
+const TEMP_PIN = 'V1';     // Temperature virtual pin
+const SET_TEMP_PIN = 'V0'; // Set temperature virtual pin
 
 function buildRequest(type, pin=null, value=null) {
   if (type == 'GET') {
