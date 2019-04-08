@@ -8,14 +8,60 @@ import {
   TouchableHighlight,
   View,
 } from 'react-native';
+import * as Secrets from "../Secrets"
 
 const TEMP_SET_STATES = Object.freeze({ PRE: 1, IN_PROGRESS: 2, POST: 3 });
-const DEFAULT_TEMPERATURE = 69;
+const HOMESCREEN_STATES = Object.freeze({ CURRENT: 1, SET: 2 });
+const DEFAULT_TEMPERATURE = '😂';
 const NOTIFICATION_TIMEOUT = 3;
+const TEMP_PIN = 'V0';     // Temperature virtual pin
+const SET_TEMP_PIN = 'V1'; // Set temperature virtual pin
+
+function buildRequest(type, pin=null, value=null) {
+  if (type == 'GET') {
+    request = 'get/' + pin;
+  }
+  else if (type == 'UPDATE' || type == 'SET') {
+    request = 'update/' + pin + '?value=' + value;
+  }
+  else { // type == 'CHECK_CONN'
+    request = 'isAppConnected'
+  }
+
+  return 'http://' + Secrets.getServerAddr() + ':' + Secrets.getPort() + '/' + Secrets.getAuthToken() + '/' + request;
+}
+
+function makeRequest(request) {
+  return fetch(request)
+    .then((response) => response.json())
+    .then(function(responseJson) {
+      return responseJson[0];
+  });
+}
+
+function getHomeTemperature() {
+  request = buildRequest('GET', TEMP_PIN);
+  return makeRequest(request);
+}
+
+function getSetTemperature() {
+  request = buildRequest('GET', SET_TEMP_PIN);
+  return makeRequest(request);
+}
+
+function updateSetTemperature(newTemp) {
+  request = buildRequest('UPDATE', SET_TEMP_PIN, newTemp);
+  makeRequest(request);
+}
+
+function checkServerConnection() {
+  request = buildRequest('CHECK_CONN');
+  return makeRequest(request);
+}
 
 function TemperatureLabel({ labelType }) {
   return (
-    <Text style={styles.temperatureLabelText}>{(labelType == 'set') ? 'Temperature will be set to' : 'Current Temperature'}</Text>
+    <Text style={styles.temperatureLabelText}>{(labelType == HOMESCREEN_STATES.SET) ? 'Temperature will be set to' : 'Current Temperature'}</Text>
   );
 }
 
@@ -120,6 +166,13 @@ class ControlVerbage extends React.Component {
     timerChanged: false,
   };
 
+  componentDidMount() {
+    // Save the current temperature from server to the state
+    getHomeTemperature().then((temp) => { 
+      this.setState({ tempValue: parseInt(temp) }); 
+    });
+  }
+  
   handleTempSetPress = () => {
     this.setState({ tempSetState: TEMP_SET_STATES.IN_PROGRESS, notificationVisible: true });
 
@@ -173,7 +226,9 @@ class ControlVerbage extends React.Component {
 
     return (
       <View style={styles.controlVerbage}>
-        {tempSetState === TEMP_SET_STATES.PRE ? (
+        {this.props.displayError ? (
+          <Text style={styles.errorMessage}>Woah there buddy! Something went wrong.</Text>
+        ) : tempSetState === TEMP_SET_STATES.PRE ? (
           <BetterButton
             buttonText="Set Temperature"
             handlePress={this.handleTempSetPress}
@@ -230,17 +285,43 @@ class ControlVerbage extends React.Component {
 }
 
 export default class HomeScreen extends React.Component {
-  state = {
-    tempState: 'current',
-    showSetTemp: false,
-    actualTemp: DEFAULT_TEMPERATURE,
-    setTemp: DEFAULT_TEMPERATURE,
-    displayTemp: DEFAULT_TEMPERATURE,
-    initTimerValue: 0,
+  state = {  
+      tempState: HOMESCREEN_STATES.CURRENT,
+      showSetTemp: false,
+      actualTemp: DEFAULT_TEMPERATURE,
+      setTemp: DEFAULT_TEMPERATURE,
+      displayTemp: DEFAULT_TEMPERATURE,
+      initTimerValue: 0,
+      connError: false,
   };
 
   static navigationOptions = { header: null };
 
+  componentDidMount() {
+    checkServerConnection().catch((conn) => {
+      this.setState({ connError: true });
+    });
+
+    // Save the current temperature & set temperature from server to the state
+    // Do this on an interval for automatic refreshes
+    setInterval(() => {
+      // Only update the temp w/ server data when tempState is current
+      if (this.state.tempState == HOMESCREEN_STATES.CURRENT) {
+        getHomeTemperature().then((temp) => {
+          temp = parseInt(temp);
+          this.setState({ actualTemp: temp, displayTemp: temp }); 
+        });
+      }
+    }, 1000);
+    
+    getSetTemperature().then((temp) => {
+      temp = parseInt(temp);
+      
+      // Make sure the set temperature is displayed, if it exists
+      this.setState({ setTemp: temp }, () => this.endTempSetProcess());
+    });
+  }
+  
   updateTemperatureValue = (newTemp) => {
     this.setState({ setTemp: newTemp, displayTemp: newTemp });
   }
@@ -250,10 +331,12 @@ export default class HomeScreen extends React.Component {
   }
 
   startTempSetProcess = () => {
-    this.setState({ tempState: 'set', showSetTemp: false, displayTemp: this.state.setTemp });
+    this.setState({ tempState: HOMESCREEN_STATES.SET, showSetTemp: false, displayTemp: this.state.setTemp });
   }
 
   endTempSetProcess = () => {
+    updateSetTemperature(this.state.setTemp);
+
     if (this.state.actualTemp == this.state.setTemp) {
       this.setState({ showSetTemp: false });
     }
@@ -261,7 +344,7 @@ export default class HomeScreen extends React.Component {
       this.setState({ showSetTemp: true });
     }
 
-    this.setState({ tempState: 'current', displayTemp: this.state.actualTemp });
+    this.setState({ tempState: HOMESCREEN_STATES.CURRENT, displayTemp: this.state.actualTemp });
   }
 
   render() {
@@ -278,10 +361,12 @@ export default class HomeScreen extends React.Component {
           </View>
 
           <View style={styles.controlBody}>
-            <ControlVerbage startTempSetProcess={this.startTempSetProcess} 
+            <ControlVerbage 
+              startTempSetProcess={this.startTempSetProcess} 
               endTempSetProcess={this.endTempSetProcess} 
               passUpTempValue={this.updateTemperatureValue} 
               passUpTimerValue={this.updateTimerValue}
+              displayError={this.state.connError}
             />
             <SetTempTimerNotification 
               tempValue={this.state.setTemp} 
@@ -398,4 +483,9 @@ const styles = StyleSheet.create({
     color: 'white',
     paddingBottom: 40,
   },
+  errorMessage: {
+    fontSize: 25,
+    textAlign: 'center',
+    padding: 50,
+  }
 });
