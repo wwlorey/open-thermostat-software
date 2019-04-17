@@ -52,7 +52,7 @@ button_manager button_driver;
 DHT dht(DHTPin, DHTTYPE); 
 
 interval_protector hvac_interval(1000);//background timer delayed hvac unit control
-interval_protector lcd_interval(300);//lcd interval control
+interval_protector lcd_interval(1500);//lcd interval control
 interval_protector dht_interval(2000);//temperature interval control
 temperature_averager temperature_record;
 int room_temperature,set_temperature;
@@ -163,21 +163,21 @@ void loop(){
     }
 
     unsigned char button_pressed = button_driver.button_scan();
-    if(button_pressed >= 0)
-    {
-      switch(button_pressed)
-      {
-          case UP_KEY:
-              set_temperature ++;
-              Blynk.virtualWrite(0, set_temperature);
-              break;
-          case DOWN_KEY:
-              set_temperature --;
-              Blynk.virtualWrite(0, set_temperature);
-              break;
+    // if(button_pressed >= 0)
+    // {
+    //   switch(button_pressed)
+    //   {
+    //       case UP_KEY:
+    //           set_temperature ++;
+    //           Blynk.virtualWrite(0, set_temperature);
+    //           break;
+    //       case DOWN_KEY:
+    //           set_temperature --;
+    //           Blynk.virtualWrite(0, set_temperature);
+    //           break;
           
-      }
-    }
+    //   }
+    // }
 
   }
     
