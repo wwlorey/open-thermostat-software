@@ -311,9 +311,14 @@ export default class HomeScreen extends React.Component {
           temp = parseInt(temp);
           this.setState({ actualTemp: temp, displayTemp: temp }); 
         });
+
+        getSetTemperature().then((temp) => {
+          temp = parseInt(temp);
+          this.setState({ setTemp: temp });
+        });
       }
     }, 1000);
-    
+
     getSetTemperature().then((temp) => {
       temp = parseInt(temp);
       
