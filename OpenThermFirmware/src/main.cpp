@@ -52,12 +52,45 @@ button_manager button_driver;
 DHT dht(DHTPin, DHTTYPE); 
 
 interval_protector hvac_interval(1000);//background timer delayed hvac unit control
-interval_protector lcd_interval(1500);//lcd interval control
-interval_protector dht_interval(2000);//temperature interval control
+interval_protector lcd_interval(5500);//lcd interval control
+interval_protector dht_interval(4000);//temperature interval control
+interval_protector vpin_push_interval(4000); //vpin push interval control
+interval_protector button_interval(200);
+bool lcd_need_update = false, vpin_need_update = false, wifi_connect = false;
 temperature_averager temperature_record;
-int room_temperature,set_temperature;
+int room_temperature,set_temperature = 65;
 unsigned char hvac_status = 0;
-char *hvac_status_str[] = { "Off", "Cool", "Heat"};
+char *hvac_status_str[] = { "Off ", "Cool", "Heat"};
+
+void IRAM_ATTR isr() {
+    if(button_interval.can_exe())
+    {
+      // extern button_manager button_driver;
+      // extern bool lcd_need_update, vpin_need_update;
+      // extern int set_temperature;
+      char button_pressed = button_driver.button_scan();
+      if(button_pressed >= 0)
+      {
+        switch(button_pressed)
+        {
+            case UP_KEY:
+                set_temperature ++;
+                break;
+            case DOWN_KEY:
+                set_temperature --;
+                break;
+            case WIFI_KEY:
+                wifi_connect = true;
+                break;
+            
+        }
+        vpin_push_interval.can_exe();//this resets the vpin push interval , so it will not push to the server until 4 seconds after last push
+        lcd_need_update = vpin_need_update = true;
+      }
+    }
+    
+}
+
 BLYNK_CONNECTED() 
 {
   Blynk.syncAll();// Request Blynk server to re-send latest values for all pins
@@ -92,20 +125,30 @@ void turn_off()
 void setup(){
   pinMode(BUTTON_UP, INPUT);
   pinMode(BUTTON_DOWN, INPUT);
+  pinMode(BUTTON_WIFI, INPUT);
+  
+  pinMode(PIN_W, OUTPUT);
+  pinMode(PIN_G, OUTPUT);
+  pinMode(PIN_Y, OUTPUT);
+
   lcd.init();// initialize LCD
   lcd.backlight();// turn on LCD backlight    
   dht.begin();
   init_temperature(temperature_record, dht);
-  Serial.begin(115200);
-  Blynk.begin(auth, ssid, pass, IPAddress(45,32,59,202), 8080);// custom server
+  // Serial.begin(115200);
+
+  Blynk.config(auth, IPAddress(45,32,59,202), 8080);
+  // Blynk.begin(auth, ssid, pass, IPAddress(45,32,59,202), 8080);// custom server
+  attachInterrupt(BUTTON_UP, isr, FALLING);
+  attachInterrupt(BUTTON_DOWN, isr, FALLING);
+  attachInterrupt(BUTTON_WIFI, isr, FALLING);
 }
 
 
 
 
 void loop(){
-
-  Blynk.run();
+  if(Blynk.connected())Blynk.run();
   if(dht_interval.can_exe())
   {
     int tmp_t = dht.readTemperature(true) + DHT_CALIBRATION_VAL;
@@ -116,27 +159,60 @@ void loop(){
     Blynk.virtualWrite(VPIN_ROOM_TEMP, room_temperature);
   }
 
-  
-  
-  if(lcd_interval.can_exe())
+  if(wifi_connect)
   {
+    wifi_connect = false;
     lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Connecting ...");
+    delay(500);
+
+    WiFi.begin(ssid, pass);
+    if(Blynk.connect(15000))
+    {
+      lcd.setCursor(0, 0);
+      lcd.print("Wifi Conected! ");
+      delay(3000);
+      lcd.clear();
+    }
+    else
+    {
+      lcd.setCursor(0, 0);
+      lcd.print("Connection Failed");
+      lcd.setCursor(0, 1);
+      lcd.print("Try Again Later");
+      delay(3000);
+      lcd.clear();
+    }
+              
+  }
+  
+  if(lcd_interval.can_exe() || lcd_need_update)
+  {
+    lcd_need_update = false;
+    // lcd.clear();
     //physical lcd
     lcd.setCursor(0, 1);
     lcd.print("Set Temp ");
     lcd.print(set_temperature);
-    lcd.print("F");
+    lcd.print(" F");
     lcd.setCursor(0, 0);// set cursor to first column, first row
     lcd.print(room_temperature);
-    lcd.print("F");
+    lcd.print(" F");
 
     lcd.setCursor(8, 0);
     lcd.print(hvac_status_str[hvac_status]);
 
     //virtual lcd on blynk
-    vlcd.clear();
-    vlcd.print(0,0,room_temperature);
-    vlcd.print(6,0,"F");
+    // vlcd.clear();
+    // vlcd.print(0,0,room_temperature);
+    // vlcd.print(6,0,"F");
+  }
+
+  if(vpin_push_interval.can_exe() && vpin_need_update)
+  {
+    vpin_need_update = false;
+    Blynk.virtualWrite(0, set_temperature);
   }
 
 
@@ -162,24 +238,9 @@ void loop(){
       turn_on_heat();
     }
 
-    unsigned char button_pressed = button_driver.button_scan();
-    // if(button_pressed >= 0)
-    // {
-    //   switch(button_pressed)
-    //   {
-    //       case UP_KEY:
-    //           set_temperature ++;
-    //           Blynk.virtualWrite(0, set_temperature);
-    //           break;
-    //       case DOWN_KEY:
-    //           set_temperature --;
-    //           Blynk.virtualWrite(0, set_temperature);
-    //           break;
-          
-    //   }
-    // }
-
   }
+
+  
     
   
 

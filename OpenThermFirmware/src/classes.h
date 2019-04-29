@@ -5,9 +5,10 @@
 #define DHTTYPE DHT11 
 #define DHTPin  3
 #define DHT_CALIBRATION_VAL -4
-#define BUTTON_DEBOUNCE_TIME 300
+#define BUTTON_DEBOUNCE_TIME 200
 #define BUTTON_UP      5 //sw2
 #define BUTTON_DOWN    18 //sw3
+#define BUTTON_WIFI    23 //sw5
 
 struct interval_protector
 {
@@ -46,15 +47,16 @@ struct temperature_averager
     }
 };
 
-#define N_BUTTONS 2
+#define N_BUTTONS 3
 #define UP_KEY 0
 #define DOWN_KEY 1
+#define WIFI_KEY 2
 struct button_manager
 {
     unsigned long last_press_time=0, current_time;
-    bool button_pressed = true;
-    unsigned char buttons[N_BUTTONS] = {BUTTON_UP,BUTTON_DOWN};
-    unsigned char button_scan()//return a number for the button pressed
+    char button_pressed = -1;
+    unsigned char buttons[N_BUTTONS] = {BUTTON_UP,BUTTON_DOWN,BUTTON_WIFI};
+    char button_scan()//return a number for the button pressed
     {
         current_time = millis();
         if((current_time - last_press_time)>BUTTON_DEBOUNCE_TIME)
@@ -68,8 +70,8 @@ struct button_manager
                     return button_pressed;
                 }
             }
-            return -1; //if nothing pressed, then -1
         }
+        return button_pressed;
     }
 };
 #endif

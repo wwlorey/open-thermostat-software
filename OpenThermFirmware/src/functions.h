@@ -12,4 +12,6 @@
 
 
 void init_temperature(temperature_averager& t_record, DHT& dht);
+
+
 #endif
