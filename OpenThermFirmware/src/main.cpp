@@ -51,8 +51,8 @@ button_manager button_driver;
 //temperature stuff
 DHT dht(DHTPin, DHTTYPE); 
 
-interval_protector hvac_interval(1000);//background timer delayed hvac unit control
-interval_protector lcd_interval(5500);//lcd interval control
+interval_protector hvac_interval(2500);//background timer delayed hvac unit control
+interval_protector lcd_interval(1500);//lcd interval control
 interval_protector dht_interval(4000);//temperature interval control
 interval_protector vpin_push_interval(4000); //vpin push interval control
 interval_protector button_interval(200);
@@ -115,6 +115,16 @@ void turn_on_cool()
   digitalWrite(PIN_G, HIGH);
 }
 
+void clear_hvac_pins()
+{
+  digitalWrite(PIN_Y, LOW);
+  digitalWrite(PIN_W, LOW);
+  digitalWrite(PIN_G, LOW);
+  digitalWrite(PIN_Y2, LOW);
+  digitalWrite(PIN_W2, LOW);
+  digitalWrite(PIN_OB, LOW);
+}
+
 void turn_off()
 {
   digitalWrite(PIN_Y, LOW);
@@ -130,6 +140,9 @@ void setup(){
   pinMode(PIN_W, OUTPUT);
   pinMode(PIN_G, OUTPUT);
   pinMode(PIN_Y, OUTPUT);
+  pinMode(PIN_W2, OUTPUT);
+  pinMode(PIN_OB, OUTPUT);
+  pinMode(PIN_Y2, OUTPUT);
 
   lcd.init();// initialize LCD
   lcd.backlight();// turn on LCD backlight    
@@ -142,6 +155,8 @@ void setup(){
   attachInterrupt(BUTTON_UP, isr, FALLING);
   attachInterrupt(BUTTON_DOWN, isr, FALLING);
   attachInterrupt(BUTTON_WIFI, isr, FALLING);
+
+  clear_hvac_pins();
 }
 
 
@@ -168,10 +183,10 @@ void loop(){
     delay(500);
 
     WiFi.begin(ssid, pass);
-    if(Blynk.connect(15000))
+    if(Blynk.connect(7000))
     {
       lcd.setCursor(0, 0);
-      lcd.print("Wifi Conected! ");
+      lcd.print("Wifi Connected! ");
       delay(3000);
       lcd.clear();
     }
@@ -195,10 +210,10 @@ void loop(){
     lcd.setCursor(0, 1);
     lcd.print("Set Temp ");
     lcd.print(set_temperature);
-    lcd.print(" F");
+    lcd.print("F  ");
     lcd.setCursor(0, 0);// set cursor to first column, first row
     lcd.print(room_temperature);
-    lcd.print(" F");
+    lcd.print("F  ");
 
     lcd.setCursor(8, 0);
     lcd.print(hvac_status_str[hvac_status]);
